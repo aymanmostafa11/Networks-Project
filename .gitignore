@@ -1,0 +1,7 @@
+# ignore all
+*
+!HTTPServer/
+
+# Except these files
+!.gitignore
+!HTTPServer/*.cs
