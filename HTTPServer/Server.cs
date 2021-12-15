@@ -54,7 +54,8 @@ namespace HTTPServer
                 }
                 catch (Exception ex)
                 {
-                    // TODO: log exception using Logger class
+                    // TODO: [DONE] log exception using Logger class
+                    Logger.LogException(ex);
                 }
             }
 
