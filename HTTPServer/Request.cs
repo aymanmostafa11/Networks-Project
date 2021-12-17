@@ -62,7 +62,18 @@ namespace HTTPServer
 
         private bool ParseRequestLine()
         {
-            throw new NotImplementedException();
+            int method = 0, URI = 1, httpVersion = 2;
+            string requestLine = requestLines[0];
+            string[] requestLineTokens = requestLine.Split(' ');
+
+            if (requestLineTokens[method] != RequestMethod.GET.ToString())
+                return false;
+
+            if (!ValidateIsURI(requestLineTokens[URI]))
+                return false;
+
+
+            return false;
         }
 
         private bool ValidateIsURI(string uri)

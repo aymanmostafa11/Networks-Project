@@ -17,9 +17,9 @@ namespace HTTPServer
 
         public Server(int portNumber, string redirectionMatrixPath)
         {
-            //TODO: call this.LoadRedirectionRules passing redirectionMatrixPath to it
+            //TODO: [DONE] call this.LoadRedirectionRules passing redirectionMatrixPath to it
             this.LoadRedirectionRules(redirectionMatrixPath);
-            //TODO: initialize this.serverSocket
+            //TODO: [DONE] initialize this.serverSocket
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint iep = new IPEndPoint(IPAddress.Any, portNumber);
             serverSocket.Bind(iep);
@@ -27,12 +27,12 @@ namespace HTTPServer
 
         public void StartServer()
         {
-            // TODO: Listen to connections, with large backlog.
+            // TODO:[DONE] Listen to connections, with large backlog.
             serverSocket.Listen(MAX_BACKLOG);
-            // TODO: Accept connections in while loop and start a thread for each connection on function "Handle Connection"
+            // TODO: [DONE] Accept connections in while loop and start a thread for each connection on function "Handle Connection"
             while (true)
             {
-                //TODO: accept connections and start thread for each accepted connection.
+                //TODO: [DONE] accept connections and start thread for each accepted connection.
                 Socket clientSocket = serverSocket.Accept();
                 Console.WriteLine("Client Accepted, Ip: " + clientSocket.RemoteEndPoint);
 
@@ -60,7 +60,7 @@ namespace HTTPServer
                     if (recievedMessageLength == 0)
                         break;
                     // TODO: [DONE] Create a Request object using received request string
-                    Request request = new Request(data.ToString());
+                    Request request = new Request(Encoding.ASCII.GetString(data));
                     // TODO: [DONE] Call HandleRequest Method that returns the response
                     Response response = HandleRequest(request);
                     // TODO: [DONE] Send Response back to client
@@ -81,12 +81,11 @@ namespace HTTPServer
 
         Response HandleRequest(Request request)
         {
-            throw new NotImplementedException();
             string content;
             try
             {
                 //TODO: check for bad request 
-
+                request.ParseRequest();
                 //TODO: map the relativeURI in request to get the physical path of the resource.
 
                 //TODO: check for redirect
@@ -104,11 +103,12 @@ namespace HTTPServer
                 // TODO: in case of exception, return Internal Server Error. 
                
             }
+            return null;
         }
 
         private string GetRedirectionPagePathIFExist(string relativePath)
         {
-            // using Configuration.RedirectionRules return the redirected page path if exists else returns empty
+            // TODO: using Configuration.RedirectionRules return the redirected page path if exists else returns empty
             
             return string.Empty;
         }
@@ -131,7 +131,8 @@ namespace HTTPServer
             }
             catch (Exception ex)
             {
-                // TODO: log exception using Logger class
+                // TODO: [DONE] log exception using Logger class
+                Logger.LogException(ex);
                 Environment.Exit(1);
             }
         }
