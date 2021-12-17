@@ -19,7 +19,8 @@ namespace HTTPServer
             String message = ex.Message;
             String log = "Time : " + datetime.ToString() + "\n" + "Exception : " + message + "\n/////////\n";
             sr.WriteLine(log);
-            sr.Close();
+            sr.Flush();
+
         }
     }
 }
