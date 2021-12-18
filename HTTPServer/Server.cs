@@ -84,12 +84,15 @@ namespace HTTPServer
             string content;
             try
             {
-                //TODO: check for bad request 
-                request.ParseRequest();
+                //TODO: check for bad request
+                if (!request.ParseRequest())
+                {
+                    //(ayman)TODO: add logic for handling bad request 
+                }
                 //TODO: map the relativeURI in request to get the physical path of the resource.
 
                 //TODO: check for redirect
-
+                
                 //TODO: check file exists
 
                 //TODO: read the physical file
