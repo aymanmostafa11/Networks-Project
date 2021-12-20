@@ -81,66 +81,92 @@ namespace HTTPServer
 
         Response HandleRequest(Request request)
         {
-            string content;
-           
-            Response response;
+            string content = string.Empty;
+            string redirected = string.Empty;
+            string physicalPath = string.Empty;
+            StatusCode statusCode = StatusCode.OK;
             try
             {
                 //TODO: check for bad request
                 if (!request.ParseRequest())
                 {
                     //(ayman)TODO: add logic for handling bad request 
-                    request.relativeURI = Configuration.BadRequestDefaultPageName;
-                    LoadDefaultPage(request.relativeURI);
-                    
-                    response = new Response(StatusCode.BadRequest, "text/html",);
-                    
+                    statusCode = StatusCode.BadRequest;
+                    content = File.ReadAllText(Path.Combine(Configuration.RootPath, Configuration.BadRequestDefaultPageName));
+                    return new Response(statusCode, "text/html", content, redirected);
                 }
                 //TODO: map the relativeURI in request to get the physical path of the resource.
-                LoadDefaultPage(request.relativeURI);
-                //TODO: check for redirect
-
+                physicalPath = Path.Combine(Configuration.RootPath, request.relativeURI);
                 //TODO: check file exists
-            
-                //TODO: read the physical file
+                if(!File.Exists(physicalPath))
+                {
+                    if (redirected != string.Empty)
+                    {
+                        statusCode = StatusCode.InternalServerError;
+                        physicalPath = Path.Combine(Configuration.RootPath, Configuration.InternalErrorDefaultPageName);
+                    }
+                    else
+                    {
+                        statusCode = StatusCode.NotFound;
+                        physicalPath = Path.Combine(Configuration.RootPath, Configuration.NotFoundDefaultPageName);
+                    }
+                }
+                //TODO: check for redirect
                 
+                redirected = GetRedirectionPagePathIFExist(request.relativeURI);
+                if(redirected != string.Empty)
+                {
+                    statusCode = StatusCode.Redirect;
+                    physicalPath = Path.Combine(Configuration.RootPath, Configuration.RedirectionDefaultPageName);
+                }
+                //TODO: read the physical file
+                content = LoadDefaultPage(physicalPath);
                 // Create OK response
+                
+
             }
             catch (Exception ex)
             {
                 // TODO: [DONE] log exception using Logger class
                 Logger.LogException(ex);
                 // TODO: in case of exception, return Internal Server Error. 
-               
+                statusCode = StatusCode.InternalServerError;
+                physicalPath = Path.Combine(Configuration.RootPath, Configuration.InternalErrorDefaultPageName);
+
             }
-            return null;
+            return new Response(statusCode,"text/html",content,redirected);
         }
 
         private string GetRedirectionPagePathIFExist(string relativePath)
         {
             // TODO: using Configuration.RedirectionRules return the redirected page path if exists else returns empty
-            
+            if(Configuration.RedirectionRules.ContainsKey(relativePath))
+            {
+                return Configuration.RedirectionRules[relativePath];
+            }
+            else { 
             return string.Empty;
+                 }
         }
 
         private string LoadDefaultPage(string defaultPageName)
         {
-            string filePath = Path.Combine(Configuration.RootPath, defaultPageName);
+            //string filePath = Path.Combine(Configuration.RootPath, defaultPageName);
             string content = "";
-            StreamReader sr;
             // TODO: check if filepath not exist log exception using Logger class and return empty string
             try
             {
-                 sr = new StreamReader(filePath);
-              
+                content = File.ReadAllText(defaultPageName);
+                return content;
             }
             catch(Exception ex)
             {
                 Logger.LogException(ex);
+                return string.Empty;
             }
             // else read file and return its contentsr.
             //content = Encoding.ASCII.GetString();
-            return content;
+            
         }
 
         private void LoadRedirectionRules(string filePath)
