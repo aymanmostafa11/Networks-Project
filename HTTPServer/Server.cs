@@ -82,21 +82,28 @@ namespace HTTPServer
         Response HandleRequest(Request request)
         {
             string content;
+           
+            Response response;
             try
             {
                 //TODO: check for bad request
                 if (!request.ParseRequest())
                 {
                     //(ayman)TODO: add logic for handling bad request 
+                    request.relativeURI = Configuration.BadRequestDefaultPageName;
+                    LoadDefaultPage(request.relativeURI);
+                    
+                    response = new Response(StatusCode.BadRequest, "text/html",);
+                    
                 }
                 //TODO: map the relativeURI in request to get the physical path of the resource.
-
+                LoadDefaultPage(request.relativeURI);
                 //TODO: check for redirect
-                
+
                 //TODO: check file exists
-
+            
                 //TODO: read the physical file
-
+                
                 // Create OK response
             }
             catch (Exception ex)
@@ -119,10 +126,21 @@ namespace HTTPServer
         private string LoadDefaultPage(string defaultPageName)
         {
             string filePath = Path.Combine(Configuration.RootPath, defaultPageName);
+            string content = "";
+            StreamReader sr;
             // TODO: check if filepath not exist log exception using Logger class and return empty string
-            
-            // else read file and return its content
-            return string.Empty;
+            try
+            {
+                 sr = new StreamReader(filePath);
+              
+            }
+            catch(Exception ex)
+            {
+                Logger.LogException(ex);
+            }
+            // else read file and return its contentsr.
+            //content = Encoding.ASCII.GetString();
+            return content;
         }
 
         private void LoadRedirectionRules(string filePath)
