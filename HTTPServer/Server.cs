@@ -29,6 +29,7 @@ namespace HTTPServer
         {
             // TODO:[DONE] Listen to connections, with large backlog.
             serverSocket.Listen(MAX_BACKLOG);
+           
             // TODO: [DONE] Accept connections in while loop and start a thread for each connection on function "Handle Connection"
             while (true)
             {
@@ -83,7 +84,8 @@ namespace HTTPServer
         {
             string content = string.Empty;
             string redirected = string.Empty;
-            string physicalPath = string.Empty;
+            string physicalPath;
+            bool found = false;
             StatusCode statusCode = StatusCode.OK;
             try
             {
@@ -92,24 +94,28 @@ namespace HTTPServer
                 {
                     //(ayman)TODO: add logic for handling bad request 
                     statusCode = StatusCode.BadRequest;
-                    content = File.ReadAllText(Path.Combine(Configuration.RootPath, Configuration.BadRequestDefaultPageName));
-                    return new Response(statusCode, "text/html", content, redirected);
+                    content =  LoadDefaultPage(Configuration.BadRequestDefaultPageName);
+                    found = true;
                 }
                 //TODO: map the relativeURI in request to get the physical path of the resource.
-                physicalPath = Path.Combine(Configuration.RootPath, request.relativeURI);
+                string temp = request.relativeURI.Substring(1);
+                physicalPath = Path.Combine(Configuration.RootPath, temp);
                 //TODO: check file exists
                 if(!File.Exists(physicalPath))
                 {
                     if (redirected != string.Empty)
                     {
                         statusCode = StatusCode.InternalServerError;
-                        physicalPath = Path.Combine(Configuration.RootPath, Configuration.InternalErrorDefaultPageName);
+                        content = LoadDefaultPage(Configuration.InternalErrorDefaultPageName);
+                       
                     }
                     else
                     {
                         statusCode = StatusCode.NotFound;
-                        physicalPath = Path.Combine(Configuration.RootPath, Configuration.NotFoundDefaultPageName);
+                        content = LoadDefaultPage(Configuration.NotFoundDefaultPageName);
+                       
                     }
+                    found = true;
                 }
                 //TODO: check for redirect
                 
@@ -117,10 +123,15 @@ namespace HTTPServer
                 if(redirected != string.Empty)
                 {
                     statusCode = StatusCode.Redirect;
-                    physicalPath = Path.Combine(Configuration.RootPath, Configuration.RedirectionDefaultPageName);
+                    content = LoadDefaultPage(Configuration.RedirectionDefaultPageName);
+                    found = true;
+                 
                 }
                 //TODO: read the physical file
-                content = LoadDefaultPage(physicalPath);
+                if (found == false)
+                {
+                    content = LoadDefaultPage(temp);
+                }
                 // Create OK response
                 
 
@@ -151,12 +162,12 @@ namespace HTTPServer
 
         private string LoadDefaultPage(string defaultPageName)
         {
-            //string filePath = Path.Combine(Configuration.RootPath, defaultPageName);
+            string filePath = Path.Combine(Configuration.RootPath, defaultPageName);
             string content = "";
             // TODO: check if filepath not exist log exception using Logger class and return empty string
             try
             {
-                content = File.ReadAllText(defaultPageName);
+                content = File.ReadAllText(filePath);
                 return content;
             }
             catch(Exception ex)
@@ -175,6 +186,19 @@ namespace HTTPServer
             {
                 // TODO: using the filepath paramter read the redirection rules from file 
                 // then fill Configuration.RedirectionRules dictionary 
+                string content = File.ReadAllText(filePath);
+                string[] lines = content.Split('\n');
+                Configuration.RedirectionRules = new Dictionary<string, string>();
+                for(int i = 0; i<lines.Length;i++)
+                {
+                    string[] temp;
+                    temp = lines[i].Split(',','\r');
+                    if(temp[0]!="") { 
+                    Configuration.RedirectionRules.Add(temp[0], temp[1]);
+                        }
+                }
+                
+
             }
             catch (Exception ex)
             {
