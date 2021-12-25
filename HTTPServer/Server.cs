@@ -119,7 +119,7 @@ namespace HTTPServer
                 }
                 //TODO: check for redirect
                 
-                redirected = GetRedirectionPagePathIFExist(request.relativeURI);
+                redirected = GetRedirectionPagePathIFExist(temp);
                 if(redirected != string.Empty)
                 {
                     statusCode = StatusCode.Redirect;
