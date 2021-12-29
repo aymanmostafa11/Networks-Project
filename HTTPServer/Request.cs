@@ -111,6 +111,10 @@ namespace HTTPServer
                 headerLines.Add(headerLine[attribute], headerLine[value]);
             }
 
+            // HTTP 1.1 doesn't allow empty header sections
+            if (headerLines.Count < 1 && this.httpVersion == HTTPVersion.HTTP11)
+                return false;
+
             return true;
         }
 
