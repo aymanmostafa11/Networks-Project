@@ -9,14 +9,16 @@ namespace HTTPServer
     {
         GET,
         POST,
-        HEAD
+        HEAD,
+        BAD_REQUEST
     }
 
     public enum HTTPVersion
     {
         HTTP10,
         HTTP11,
-        HTTP09
+        HTTP09,
+        INVALID_HTTP
     }
 
     class Request
@@ -75,12 +77,16 @@ namespace HTTPServer
 
 
             this.method = parseRequestMethod(requestLineTokens[method]);
+            if (this.method == RequestMethod.BAD_REQUEST)
+                return false;
 
             if (!ValidateIsURI(requestLineTokens[URI]))
                 return false;
             relativeURI = requestLineTokens[URI];
 
             this.httpVersion = parseRequestHttpVersion(requestLineTokens[httpVersion]);
+            if (this.httpVersion == HTTPVersion.INVALID_HTTP)
+                return false;
 
             return true;
         }
@@ -98,6 +104,9 @@ namespace HTTPServer
 
             for (int i = headerIndexStart; i < headerIndexEnd; i++)
             {
+                
+                if (requestLines[i] == "")
+                    break;
                 string[] headerLine = requestLines[i].Split(seperatingString, StringSplitOptions.None);
                 headerLines.Add(headerLine[attribute], headerLine[value]);
             }
@@ -122,13 +131,18 @@ namespace HTTPServer
                 case "HEAD":
                     return RequestMethod.HEAD;
                 default:
-                    throw new Exception("Invalid Request Method!");
+                    return RequestMethod.BAD_REQUEST;
+                    
 
             }
         }
 
         private HTTPVersion parseRequestHttpVersion(string text)
         {
+            string[] http = text.Split('/');
+            if (http[0] != "HTTP")
+                return HTTPVersion.INVALID_HTTP;
+
             switch (text)
             {
                 case "HTTP/1.0":

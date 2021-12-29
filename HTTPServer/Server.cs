@@ -92,40 +92,40 @@ namespace HTTPServer
                 //TODO: check for bad request
                 if (!request.ParseRequest())
                 {
-                    //(ayman)TODO: add logic for handling bad request 
+                    //TODO: add logic for handling bad request 
                     statusCode = StatusCode.BadRequest;
-                    content =  LoadDefaultPage(Configuration.BadRequestDefaultPageName);
-                    found = true;
+                    content = LoadDefaultPage(Configuration.BadRequestDefaultPageName);
+                    return new Response(statusCode, "text/html", content, redirected);
                 }
                 //TODO: map the relativeURI in request to get the physical path of the resource.
                 string temp = request.relativeURI.Substring(1);
                 physicalPath = Path.Combine(Configuration.RootPath, temp);
                 //TODO: check file exists
-                if(!File.Exists(physicalPath))
+                if (!File.Exists(physicalPath))
                 {
                     if (redirected != string.Empty)
                     {
                         statusCode = StatusCode.InternalServerError;
                         content = LoadDefaultPage(Configuration.InternalErrorDefaultPageName);
-                       
+
                     }
                     else
                     {
                         statusCode = StatusCode.NotFound;
                         content = LoadDefaultPage(Configuration.NotFoundDefaultPageName);
-                       
+
                     }
                     found = true;
                 }
                 //TODO: check for redirect
-                
+
                 redirected = GetRedirectionPagePathIFExist(temp);
-                if(redirected != string.Empty)
+                if (redirected != string.Empty)
                 {
                     statusCode = StatusCode.Redirect;
                     content = LoadDefaultPage(Configuration.RedirectionDefaultPageName);
                     found = true;
-                 
+
                 }
                 //TODO: read the physical file
                 if (found == false)
@@ -133,7 +133,7 @@ namespace HTTPServer
                     content = LoadDefaultPage(temp);
                 }
                 // Create OK response
-                
+
 
             }
             catch (Exception ex)
@@ -142,7 +142,7 @@ namespace HTTPServer
                 Logger.LogException(ex);
                 // TODO: in case of exception, return Internal Server Error. 
                 statusCode = StatusCode.InternalServerError;
-                physicalPath = Path.Combine(Configuration.RootPath, Configuration.InternalErrorDefaultPageName);
+                content = LoadDefaultPage(Configuration.InternalErrorDefaultPageName);
 
             }
             return new Response(statusCode,"text/html",content,redirected);
