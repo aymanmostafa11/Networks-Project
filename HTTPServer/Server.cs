@@ -103,19 +103,9 @@ namespace HTTPServer
                 //TODO: check file exists
                 if (!File.Exists(physicalPath))
                 {
-                    if (redirected != string.Empty)
-                    {
-                        statusCode = StatusCode.InternalServerError;
-                        content = LoadDefaultPage(Configuration.InternalErrorDefaultPageName);
-
-                    }
-                    else
-                    {
-                        statusCode = StatusCode.NotFound;
-                        content = LoadDefaultPage(Configuration.NotFoundDefaultPageName);
-
-                    }
-                    found = true;
+                       statusCode = StatusCode.NotFound;
+                       content = LoadDefaultPage(Configuration.NotFoundDefaultPageName);
+                       found = true;
                 }
                 //TODO: check for redirect
 
